@@ -3,7 +3,7 @@ description: Uploads dSYM files to Firebase Crashlytics using the `upload-symbol
 
 inputs:
   derived-data-path:
-    description: Path to the Xcode Derived Data directory.
+    description: Path to the Xcode DerivedData directory. Used to discover the upload-symbols tool if neither upload-symbols-path nor source-packages-path is specified.
     required: true
   google-service-info-plist:
     description: Path to the GoogleService-Info.plist file for the target Firebase project.
@@ -11,10 +11,18 @@ inputs:
   archive-path:
     description: Path to the .xcarchive file. The dSYMs will be read from the dSYMs directory inside the archive.
     required: true
+  source-packages-path:
+    description: >
+      Path to a custom cloned source packages directory (i.e. the value passed to
+      -clonedSourcePackagesDirPath in xcodebuild). When provided, the upload-symbols
+      tool is searched here before falling back to the SPM checkout inside derived-data-path.
+    required: false
   upload-symbols-path:
     description: >
-      Path to the upload-symbols tool. If not specified, the tool is automatically
-      discovered from the Firebase iOS SDK SPM checkout inside derived-data-path.
+      Explicit path to the upload-symbols tool. Takes precedence over all discovery
+      strategies. If not specified, the tool is discovered automatically — first from
+      source-packages-path (if provided), then from the Firebase iOS SDK SPM checkout
+      inside derived-data-path.
     required: false
 
 runs:
@@ -27,6 +35,8 @@ runs:
 
         if [[ -n "${{ inputs.upload-symbols-path }}" ]]; then
           upload_symbols="${{ inputs.upload-symbols-path }}"
+        elif [[ -n "${{ inputs.source-packages-path }}" ]]; then
+          upload_symbols="${{ inputs.source-packages-path }}/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols"
         else
           upload_symbols_candidates=("${{ inputs.derived-data-path }}"/*/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols)
           upload_symbols="${upload_symbols_candidates[0]}"
