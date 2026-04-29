@@ -25,7 +25,7 @@ This repository contains GitHub Actions that are used by various projects at Q42
   </thead>
   <tbody>
     <tr>
-      <td nowrap><a href="./install-certificate-bundle/">install-certificate-bundle</a></td>
+      <td nowrap><a href="./install-certificate/">install-certificate</a></td>
       <td>Installs code signing certificates from a P12 file into a temporary Keychain.</td>
     </tr>
     <tr>
