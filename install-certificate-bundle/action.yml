@@ -1,0 +1,49 @@
+name: Install certificate bundle
+description: Installs code signing certificates from a P12 file into a temporary Keychain.
+inputs:
+  build-certificate-base64:
+    required: true
+    description: The base64-encoded p12 build certificate
+  certificate-password:
+    required: true
+    description: The password for the p12 build certificate
+  keychain-name:
+    description: Name of the keychain to add the certificate to. The keychain will be created if it does not exist.
+    required: false
+    default: build.keychain
+  keychain-password:
+    description: Password of the keychain to add the certificate to. Fallback to a randomly generated password if not set or empty.
+    required: false
+  set-default-keychain:
+    description: Set the keychain as the default keychain.
+    required: false
+    default: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install code signing certificate
+      shell: bash
+      # Source:
+      # https://docs.github.com/en/actions/deployment/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development
+      run: |
+        INPUT_KEYCHAIN_PASSWORD_VALUE="${{ inputs.keychain-password }}"
+        KEYCHAIN_PASSWORD="${INPUT_KEYCHAIN_PASSWORD_VALUE:-$(uuidgen)}"
+        KEYCHAIN_NAME="${{ inputs.keychain-name }}"
+        KEYCHAIN_PATH="/Users/$(whoami)/Library/Keychains/${KEYCHAIN_NAME}"
+
+        BUILD_CERTIFICATE_BASE64="${{ inputs.build-certificate-base64 }}"
+        CERTIFICATE_PASSWORD="${{ inputs.certificate-password }}"
+
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+
+        # Import certificate from secrets
+        echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+        # Create temporary keychain
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+        # Import certificate to keychain
+        security import $CERTIFICATE_PATH -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH

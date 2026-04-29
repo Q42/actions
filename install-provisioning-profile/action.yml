@@ -1,0 +1,21 @@
+name: Install provisioning profile
+description: Installs a provisioning profile to be used by Xcode.
+inputs:
+  build-provision-profile-base64:
+    required: true
+    description: The base64-encoded build provisioning profile
+runs:
+  using: "composite"
+  steps:
+    - name: Install provisioning profile
+      env:
+        BUILD_PROVISION_PROFILE_BASE64: ${{ inputs.build-provision-profile-base64 }}
+      shell: bash
+      # Source:
+      # https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications#add-a-step-to-your-workflow
+      run: |
+        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+        echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+        # Apply provisioning profile
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
