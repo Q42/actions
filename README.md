@@ -32,5 +32,9 @@ This repository contains GitHub Actions that are used by various projects at Q42
       <td nowrap><a href="./install-provisioning-profile/">install-provisioning-profile</a></td>
       <td>Installs a provisioning profile to be used by Xcode.</td>
     </tr>
+    <tr>
+      <td nowrap><a href="./upload-symbols-to-firebase/">upload-symbols-to-firebase</a></td>
+      <td>Uploads dSYM files to Firebase Crashlytics using the <code>upload-symbols</code> tool from the Firebase iOS SDK.</td>
+    </tr>
   </tbody>
 </table>

@@ -1,0 +1,42 @@
+name: Upload dSYMs to Firebase Crashlytics
+description: Uploads dSYM files to Firebase Crashlytics using the `upload-symbols` tool from the Firebase iOS SDK.
+
+inputs:
+  derived-data-path:
+    description: Path to the Xcode Derived Data directory.
+    required: true
+  google-service-info-plist:
+    description: Path to the GoogleService-Info.plist file for the target Firebase project.
+    required: true
+  archive-path:
+    description: Path to the .xcarchive file. The dSYMs will be read from the dSYMs directory inside the archive.
+    required: true
+  upload-symbols-path:
+    description: >
+      Path to the upload-symbols tool. If not specified, the tool is automatically
+      discovered from the Firebase iOS SDK SPM checkout inside derived-data-path.
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Upload dSYMs to Firebase Crashlytics
+      shell: bash
+      run: |
+        echo "Uploading Symbols To Firebase"
+
+        if [[ -n "${{ inputs.upload-symbols-path }}" ]]; then
+          upload_symbols="${{ inputs.upload-symbols-path }}"
+        else
+          upload_symbols_candidates=("${{ inputs.derived-data-path }}"/*/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols)
+          upload_symbols="${upload_symbols_candidates[0]}"
+        fi
+
+        if [[ ! -x "$upload_symbols" ]]; then
+          echo "Error: upload-symbols not found or not executable at: $upload_symbols" >&2
+          exit 1
+        fi
+
+        "$upload_symbols" \
+          -gsp "${{ inputs.google-service-info-plist }}" \
+          -p ios "${{ inputs.archive-path }}"/dSYMs/*.dSYM
