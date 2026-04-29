@@ -4,7 +4,7 @@ Uploads dSYM files to Firebase Crashlytics using the `upload-symbols` tool from 
 
 ```yml
 - name: Upload dSYMs to Firebase Crashlytics
-  uses: q42/actions/upload-symbols-to-firebase@main
+  uses: q42/actions/upload-symbols-to-firebase@v1
   with:
     derived-data-path: ${{ runner.temp }}/DerivedData
     google-service-info-plist: ./MyApp/GoogleService-Info.plist

@@ -4,7 +4,7 @@ Installs the specified provisioning profile so that Xcode can use it.
 
 ```yml
 - name: Install Provisioning Profile
-  uses: q42/actions/install-provisioning-profile@main
+  uses: q42/actions/install-provisioning-profile@v1
   with:
     build-provision-profile-base64: ${{ vars.PROVISIONING_PROFILE_PRODUCTION }}
 ```
