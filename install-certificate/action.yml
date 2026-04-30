@@ -1,5 +1,5 @@
 name: Install certificate bundle
-description: Installs code signing certificates from a P12 file into a temporary Keychain.
+description: Installs code signing certificate(s) from a P12 file into a temporary Keychain.
 inputs:
   build-certificate-base64:
     required: true
@@ -7,17 +7,9 @@ inputs:
   certificate-password:
     required: true
     description: The password for the p12 build certificate
-  keychain-name:
-    description: Name of the keychain to add the certificate to. The keychain will be created if it does not exist.
-    required: false
-    default: build.keychain
   keychain-password:
+    required: false
     description: Password of the keychain to add the certificate to. Fallback to a randomly generated password if not set or empty.
-    required: false
-  set-default-keychain:
-    description: Set the keychain as the default keychain.
-    required: false
-    default: true
 runs:
   using: "composite"
   steps:
@@ -26,15 +18,13 @@ runs:
       # Source:
       # https://docs.github.com/en/actions/deployment/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development
       run: |
-        INPUT_KEYCHAIN_PASSWORD_VALUE="${{ inputs.keychain-password }}"
-        KEYCHAIN_PASSWORD="${INPUT_KEYCHAIN_PASSWORD_VALUE:-$(uuidgen)}"
-        KEYCHAIN_NAME="${{ inputs.keychain-name }}"
-        KEYCHAIN_PATH="/Users/$(whoami)/Library/Keychains/${KEYCHAIN_NAME}"
-
+        # Create variables
         BUILD_CERTIFICATE_BASE64="${{ inputs.build-certificate-base64 }}"
         CERTIFICATE_PASSWORD="${{ inputs.certificate-password }}"
-
+        INPUT_KEYCHAIN_PASSWORD_VALUE="${{ inputs.keychain-password }}"
+        KEYCHAIN_PASSWORD="${INPUT_KEYCHAIN_PASSWORD_VALUE:-$(uuidgen)}"
         CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
         # Import certificate from secrets
         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
