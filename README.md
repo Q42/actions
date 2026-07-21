@@ -38,3 +38,15 @@ This repository contains GitHub Actions that are used by various projects at Q42
     </tr>
   </tbody>
 </table>
+
+## Requirements
+
+These actions target iOS/Xcode workflows and must run on a macOS runner (e.g. `runs-on: macos-latest`). 
+They rely on macOS-only tooling such as `security`, `uuidgen`, and Xcode/keychain paths.
+
+## Versioning
+
+Reference an action by tag:
+
+- `@v1` — a moving major-version tag that tracks the latest release in the `v1` line. Convenient, but the underlying commit changes over time.
+- `@v1.0.0` — an immutable tag pinned to a specific release. Prefer this when you need reproducible builds.
