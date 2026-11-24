@@ -25,6 +25,10 @@ This repository contains GitHub Actions that are used by various projects at Q42
   </thead>
   <tbody>
     <tr>
+      <td nowrap><a href="./cmp-change-version/">cmp-change-version</a></td>
+      <td>Overrides the version code and version name of a Compose Multiplatform app for all later Gradle calls in the job.</td>
+    </tr>
+    <tr>
       <td nowrap><a href="./install-certificate/">install-certificate</a></td>
       <td>Installs code signing certificates from a P12 file into a temporary Keychain.</td>
     </tr>

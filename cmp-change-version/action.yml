@@ -1,0 +1,64 @@
+name: Change Compose Multiplatform app version
+description: Overrides the app version code (and optionally version name) of a Compose Multiplatform project for all later Gradle calls in the job, including those started by Xcode.
+
+inputs:
+  version-code:
+    description: Explicit version code to use. Defaults to the workflow run number plus version-code-offset.
+    required: false
+  version-code-offset:
+    description: Number added to the workflow run number to calculate the version code. Ignored when version-code is set.
+    required: false
+    default: '0'
+  version-code-property:
+    description: Name of the Gradle project property that holds the version code.
+    required: false
+    default: appVersionCode
+  version-name:
+    description: Version name to use. When not set, the version name is not overridden.
+    required: false
+  version-name-property:
+    description: Name of the Gradle project property that holds the version name.
+    required: false
+    default: appVersionName
+
+outputs:
+  version-code:
+    description: The version code that was set.
+    value: ${{ steps.version.outputs.version-code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Override app version
+      id: version
+      shell: bash
+      env:
+        VERSION_CODE: ${{ inputs.version-code }}
+        VERSION_CODE_OFFSET: ${{ inputs.version-code-offset }}
+        VERSION_CODE_PROPERTY: ${{ inputs.version-code-property }}
+        VERSION_NAME: ${{ inputs.version-name }}
+        VERSION_NAME_PROPERTY: ${{ inputs.version-name-property }}
+        RUN_NUMBER: ${{ github.run_number }}
+      run: |
+        if [[ -z "$VERSION_CODE" ]]; then
+          if [[ ! "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "Error: version-code-offset must be a non-negative integer, got: $VERSION_CODE_OFFSET" >&2
+            exit 1
+          fi
+          VERSION_CODE=$(( RUN_NUMBER + VERSION_CODE_OFFSET ))
+        elif [[ ! "$VERSION_CODE" =~ ^[0-9]+$ ]]; then
+          echo "Error: version-code must be a non-negative integer, got: $VERSION_CODE" >&2
+          exit 1
+        fi
+
+        # Gradle reads ORG_GRADLE_PROJECT_* environment variables as project properties, which take
+        # precedence over gradle.properties. Setting them in GITHUB_ENV applies them to every later
+        # step in the job, including Gradle calls started by Xcode (embedAndSignAppleFrameworkForXcode).
+        echo "ORG_GRADLE_PROJECT_${VERSION_CODE_PROPERTY}=${VERSION_CODE}" >> "$GITHUB_ENV"
+        echo "version-code=${VERSION_CODE}" >> "$GITHUB_OUTPUT"
+        echo "Version code: ${VERSION_CODE} (${VERSION_CODE_PROPERTY})"
+
+        if [[ -n "$VERSION_NAME" ]]; then
+          echo "ORG_GRADLE_PROJECT_${VERSION_NAME_PROPERTY}=${VERSION_NAME}" >> "$GITHUB_ENV"
+          echo "Version name: ${VERSION_NAME} (${VERSION_NAME_PROPERTY})"
+        fi
