@@ -1,6 +1,16 @@
-## [install-certificate](https://github.com/q42/actions/blob/main/install-certificate/action.yml)
+# [install-certificate](https://github.com/q42/actions/blob/main/install-certificate/action.yml)
 
-Installs the specified certificate in the keychain.
+Installs the code signing certificate(s) from a base64-encoded P12 file into a temporary keychain. A P12 may contain more than one certificate; all of them are imported.
+
+## Inputs
+
+| Input | Required | Description |
+| --- | --- | --- |
+| `build-certificate-base64` | yes | The base64-encoded P12 build certificate. |
+| `certificate-password` | yes | The password for the P12 build certificate. |
+| `keychain-password` | no | Password for the temporary keychain the certificate is imported into. Defaults to a randomly generated value (`uuidgen`) when unset or empty, which is fine for most CI runs. |
+
+## Example
 
 ```yml
 - name: Install Certificate
