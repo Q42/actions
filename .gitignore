@@ -16,3 +16,9 @@ private_keys/
 credentials.json
 serviceAccount*.json
 *-credentials.json
+
+# JetBrains IDEs: only share project-wide settings
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/vcs.xml
